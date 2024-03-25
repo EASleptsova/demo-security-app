@@ -10,22 +10,26 @@ export function SecurityDetail() {
   const foundSecurity = data.find((security) => security.ticker === symbol);
   /* NOTE: for demo purposes use mock data if api is not available */
   const [security, setSecurity] = useState(foundSecurity);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchSecurity = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch(
           `http://localhost:7000/securities/${symbol}`
         );
         const data = await response.json();
         setSecurity(data);
+        setIsLoading(false);
       } catch (e) {
         console.error("Error fetching security data", e);
+        setIsLoading(false);
       }
     };
 
     fetchSecurity();
-  }, []);
+  }, [symbol]);
 
   if (!security) return <h1>No data found</h1>;
 
@@ -77,14 +81,20 @@ export function SecurityDetail() {
   return (
     <div className="app-wrapper">
       <h1>Security Detail</h1>
-      <h2>
-        {symbol} {security?.securityName}
-      </h2>
-      <br />
-      <h3>Sector: {security?.sector}</h3>
-      <h3>Country: {security?.country}</h3>
+      {isLoading ? (
+        <h4>Loading...</h4>
+      ) : (
+        <>
+          <h2>
+            {symbol} {security?.securityName}
+          </h2>
+          <br />
+          <h3>Sector: {security?.sector}</h3>
+          <h3>Country: {security?.country}</h3>
 
-      <HighchartsReact highcharts={Highcharts} options={options} />
+          <HighchartsReact highcharts={Highcharts} options={options} />
+        </>
+      )}
     </div>
   );
 }
